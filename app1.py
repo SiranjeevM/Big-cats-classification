@@ -5,29 +5,13 @@ from tensorflow.keras.preprocessing import image
 import PIL.Image as Image
 import tensorflow_hub as hub
 
-# Load the pre-trained ResNet model from TensorFlow Hub
-resnet_url = "https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/4"
-feature_extractor_layer = hub.KerasLayer(resnet_url, trainable=False)
+# Function to load the model with a custom object scope
+def load_model_with_custom_objects(model_path):
+    custom_objects = {"KerasLayer": hub.KerasLayer}
+    return tf.keras.models.load_model(model_path, custom_objects=custom_objects)
 
-# Define a function to create your custom model
-def create_custom_model():
-    model = tf.keras.Sequential([
-        feature_extractor_layer,
-        tf.keras.layers.Dropout(0.2),
-        tf.keras.layers.Dense(512, activation="relu"),
-        tf.keras.layers.Dense(256, activation="relu"),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Dropout(0.2),
-        tf.keras.layers.Dense(128, activation="relu"),
-        tf.keras.layers.Dense(10, activation='softmax', name='output_layer')
-    ])
-    return model
-
-# Create an instance of the custom model
-model = create_custom_model()
-
-# Load the pre-trained weights of your custom model
-model.load("model.h5")
+# Load the pre-trained ResNet model with custom objects
+model = load_model_with_custom_objects("model.h5")
 
 # Define a function to make predictions
 def predict_image(image_path):
