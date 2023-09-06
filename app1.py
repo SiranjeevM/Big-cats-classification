@@ -11,7 +11,7 @@ def load_model_with_custom_objects(model_path):
     return tf.keras.models.load_model(model_path, custom_objects=custom_objects)
 
 # Load the pre-trained ResNet model with custom objects
-model = load_model_with_custom_objects("model.h5")
+model = tf.keras.model.load_model("model.h5")
 
 # Define a function to make predictions
 def predict_image(image_path):
