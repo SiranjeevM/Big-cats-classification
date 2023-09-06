@@ -1,51 +1,71 @@
+
 import streamlit as st
-import numpy as np
-import tensorflow as tf
 from tensorflow.keras.preprocessing import image
-import PIL.Image as Image
+from tensorflow.keras.models import load_model
 import tensorflow_hub as hub
+from PIL import Image
+import numpy as np
+st.title("Big cat Image Classification")
 
-# Function to load the model with a custom object scope
-def load_model_with_custom_objects(model_path):
-    custom_objects = {"KerasLayer": hub.KerasLayer}
-    return tf.keras.models.load_model(model_path, custom_objects=custom_objects)
+st.write("Predict the cat that is being represented in the image.")
 
-# Load the pre-trained ResNet model with custom objects
-model = load_model_with_custom_objects("model.h5")
+model = load_model("model.h5",custom_objects={'KerasLayer':hub.KerasLayer})
+labels = {
+        0: 'AFRICAN LEOPARD',
+        1: 'CARACAL',
+        2: "CHEETAH",
+        3: "CLOUDED LEOPARD",
+        4: "JAGUAR",
+        5: "LION",
+        6: "OCELOT",
+        7:"PUMA",
+        8:"SNOW LEOPARD",
+        9:"TIGER"
+    }
 
-# Define a function to make predictions
-def predict_image(image_path):
-    pred_image = Image.open(image_path).resize((224, 224))
-    pred_image = np.array(pred_image) / 255.0
-    pred_image = np.expand_dims(pred_image, axis=0)
-    result = model.predict(pred_image)
-    max_index = np.argmax(result)
-    return max_index
 
-# Streamlit app
-st.title("Wildlife Classifier")
 
-# Upload an image for prediction
-uploaded_image = st.file_uploader("Upload an image...", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader(
+    "Upload an image of a cat type animal :", type='jpg'
+)
+predictions=-1
+if uploaded_file is not None:
+    image1 = Image.open(uploaded_file)
+    image1=image.smart_resize(image1,(224,224))
+    img_array = image.img_to_array(image1)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = img_array/255.0
+    predictions = model.predict(img_array)
+    label=labels[np.argmax(predictions)]
 
-if uploaded_image is not None:
-    st.image(uploaded_image, caption="Uploaded Image", use_column_width=True)
 
-    if st.button("Predict"):
-        try:
-            max_index = predict_image(uploaded_image)
-            classes = [
-                "AFRICAN LEOPARD",
-                "CARACAL",
-                "CHEETAH",
-                "CLOUDED LEOPARD",
-                "JAGUAR",
-                "LION",
-                "OCELOT",
-                "PUMA",
-                "SNOW LEOPARD",
-                "TIGER",
-            ]
-            st.write("Prediction:", classes[max_index])
-        except Exception as e:
-            st.error("An error occurred during prediction.")
+st.write("### Prediction Result")
+if st.button("Predict"):
+    if uploaded_file is not None:
+        image1 = Image.open(uploaded_file)
+        st.image(image1, caption="Uploaded Image", use_column_width=True)
+        st.markdown(
+            f"<h2 style='text-align: center;'>Image of {label}</h2>",
+            unsafe_allow_html=True,
+        )
+    else:
+        st.write("Please upload file or choose sample image.")
+
+
+st.write("If you would not like to upload an image, you can use the sample image instead:")
+sample_img_choice = st.button("Use Sample Image")
+
+if sample_img_choice:
+    image1 = Image.open("9.tiger.jpg")
+    image1=image.smart_resize(image1,(224,224))
+    img_array = image.img_to_array(image1)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = img_array/255.0
+    predictions = model.predict(img_array)
+    label=labels[np.argmax(predictions)]
+    image1 = Image.open("9.tiger.jpg")
+    st.image(image1, caption="Uploaded Image", use_column_width=True)    
+    st.markdown(
+        f"<h2 style='text-align: center;'>{label}</h2>",
+        unsafe_allow_html=True,
+    )
