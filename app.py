@@ -1,5 +1,6 @@
 
 import streamlit as st
+!pip install tensorflow
 import tensorflow as tf
 from tf.keras.preprocessing import image
 from tensorflow.keras.models import load_model
