@@ -27,7 +27,7 @@ def create_custom_model():
 model = create_custom_model()
 
 # Load the pre-trained weights of your custom model
-model.load_weights("model_weights.h5")
+model.load_weights("model.h5")
 
 # Define a function to make predictions
 def predict_image(image_path):
